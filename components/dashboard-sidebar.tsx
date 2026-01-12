@@ -1,0 +1,304 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { UserButton } from "@clerk/nextjs";
+import {
+  BookOpen,
+  Phone,
+  Calculator,
+  Target,
+  FileText,
+  BarChart3,
+  Home,
+  Lightbulb,
+  TrendingUp,
+  LineChart,
+  Settings,
+  Files,
+  Search,
+  User,
+  ChevronRight,
+  Menu,
+  PanelLeft,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface NavItem {
+  title: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  items?: NavItem[];
+}
+
+const navigationItems: NavItem[] = [
+  {
+    title: "ড্যাশবোর্ড",
+    href: "/dashboard",
+    icon: Home,
+  },
+  {
+    title: "AI শিক্ষক",
+    href: "/dashboard/voice-ai",
+    icon: Phone,
+  },
+  {
+    title: "গণিত সমাধান",
+    href: "/dashboard/math-solver",
+    icon: Calculator,
+  },
+  {
+    title: "অনুশীলন",
+    href: "/dashboard/practice",
+    icon: Target,
+  },
+];
+
+const strategyItems: NavItem[] = [
+  {
+    title: "বই পড়ুন",
+    href: "/dashboard/book-reader",
+    icon: FileText,
+  },
+  {
+    title: "কুইজ টেস্ট",
+    href: "/dashboard/mock-quiz",
+    icon: Lightbulb,
+  },
+  {
+    title: "স্টাডি রিপোর্ট",
+    href: "/dashboard/analytics",
+    icon: TrendingUp,
+  },
+  {
+    title: "অগ্রগতি",
+    href: "/dashboard/progress",
+    icon: LineChart,
+  },
+];
+
+const knowledgeItems: NavItem[] = [
+  {
+    title: "রিসোর্স",
+    href: "/dashboard/resources",
+    icon: Files,
+  },
+];
+
+const searchItems: NavItem[] = [
+  {
+    title: "টপিক খুঁজুন",
+    href: "/dashboard/search",
+    icon: Search,
+  },
+  {
+    title: "প্রোফাইল",
+    href: "/dashboard/user-profile",
+    icon: User,
+  },
+];
+
+interface CollapsibleSectionProps {
+  title: string;
+  items: NavItem[];
+  isCollapsed: boolean;
+}
+
+function CollapsibleSection({
+  title,
+  items,
+  isCollapsed,
+}: CollapsibleSectionProps) {
+  const [isOpen, setIsOpen] = React.useState(true);
+  const pathname = usePathname();
+
+  return (
+    <div className="mb-6">
+      {!isCollapsed && (
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center justify-between w-full px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700 transition-colors"
+        >
+          <span>{title}</span>
+          <ChevronRight
+            className={cn(
+              "h-4 w-4 transition-transform",
+              isOpen && "rotate-90"
+            )}
+          />
+        </button>
+      )}
+      {(isOpen || isCollapsed) && (
+        <div className="space-y-1 mt-2">
+          {items.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
+                  isActive
+                    ? "bg-teal-50 text-teal-600"
+                    : "text-gray-700 hover:bg-gray-100",
+                  isCollapsed && "justify-center"
+                )}
+                title={isCollapsed ? item.title : undefined}
+              >
+                <Icon
+                  className={cn(
+                    "h-5 w-5 flex-shrink-0",
+                    !isCollapsed && "mr-3"
+                  )}
+                />
+                {!isCollapsed && <span>{item.title}</span>}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function DashboardSidebar() {
+  const [isCollapsed, setIsCollapsed] = React.useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("dashboard-sidebar-collapsed");
+      return saved === "true";
+    }
+    return false;
+  });
+  const [isMobileOpen, setIsMobileOpen] = React.useState(false);
+  const pathname = usePathname();
+
+  // Save collapsed state to localStorage whenever it changes
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("dashboard-sidebar-collapsed", String(isCollapsed));
+    }
+  }, [isCollapsed]);
+
+  return (
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsMobileOpen(!isMobileOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-md border border-gray-200"
+      >
+        <Menu className="h-6 w-6 text-gray-700" />
+      </button>
+
+      {/* Mobile Overlay */}
+      {isMobileOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          "fixed lg:sticky top-0 left-0 z-40 h-screen bg-white border-r border-gray-200 transition-all duration-300",
+          isCollapsed ? "w-[72px]" : "w-[280px]",
+          isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        )}
+      >
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            {!isCollapsed && (
+              <div className="flex items-center space-x-2">
+                <img src="/borno.png" alt="Borno AI Logo" className="h-8 w-8 object-contain" />
+                <span className="text-xl font-bold text-gray-900">
+                  Borno AI
+                </span>
+              </div>
+            )}
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className={cn(
+                "p-2 rounded-lg hover:bg-gray-100 transition-colors",
+                isCollapsed && "mx-auto"
+              )}
+            >
+              <PanelLeft
+                className={cn(
+                  "h-5 w-5 text-gray-600 transition-transform",
+                  isCollapsed && "rotate-180"
+                )}
+              />
+            </button>
+          </div>
+
+
+          {/* Navigation */}
+          <nav className="flex-1 overflow-y-auto p-4">
+            <CollapsibleSection
+              title="প্রধান মেনু"
+              items={navigationItems}
+              isCollapsed={isCollapsed}
+            />
+            <CollapsibleSection
+              title="একাডেমিক"
+              items={strategyItems}
+              isCollapsed={isCollapsed}
+            />
+            <CollapsibleSection
+              title="লাইব্রেরি"
+              items={knowledgeItems}
+              isCollapsed={isCollapsed}
+            />
+            <CollapsibleSection
+              title="অন্যান্য"
+              items={searchItems}
+              isCollapsed={isCollapsed}
+            />
+          </nav>
+
+          <div className="p-4 border-t border-gray-200 space-y-4">
+            {/* User Section - Now Clickable */}
+            <Link
+              href="/dashboard/user-profile"
+              className={cn(
+                "pt-4 border-t border-gray-100 flex items-center space-x-3 hover:bg-gray-50 p-2 rounded-lg transition-colors",
+                isCollapsed && "justify-center"
+              )}
+            >
+              <UserButton afterSignOutUrl="/" />
+              {!isCollapsed && (
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    My Account
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    Student Dashboard
+                  </p>
+                </div>
+              )}
+            </Link>
+
+            <Link
+              href="/dashboard/user-profile/security"
+              className={cn(
+                "flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 transition-colors border-t border-gray-100 pt-4",
+                pathname === "/dashboard/user-profile/security" &&
+                "bg-teal-50 text-teal-600",
+                isCollapsed && "justify-center"
+              )}
+              title={isCollapsed ? "Settings" : undefined}
+            >
+              <Settings
+                className={cn("h-5 w-5 flex-shrink-0", !isCollapsed && "mr-3")}
+              />
+              {!isCollapsed && <span>Settings</span>}
+            </Link>
+          </div>
+        </div>
+      </aside >
+    </>
+  );
+}
